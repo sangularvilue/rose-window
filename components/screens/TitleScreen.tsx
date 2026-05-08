@@ -59,12 +59,6 @@ export default function TitleScreen() {
         }}>
           Rose Window
         </div>
-        <div style={{
-          fontFamily: FONT_DISPLAY, fontStyle: 'italic', fontSize: 'clamp(14px, 2vw, 22px)',
-          letterSpacing: 4, color: GOLD_INK, marginTop: 6,
-        }}>
-          a game of stained glass &amp; sealed bids
-        </div>
         <div style={{ marginTop: 32, display: 'flex', gap: 14, flexWrap: 'wrap', justifyContent: 'center' }}>
           <Link href="/lobby?action=new" style={{
             padding: '12px 28px',
