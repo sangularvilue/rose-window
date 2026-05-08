@@ -1,5 +1,6 @@
 import GameRoom from '@/components/screens/GameRoom';
 
-export default function RoomPage({ params }: { params: { id: string } }) {
-  return <GameRoom roomId={params.id} />;
+export default async function RoomPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  return <GameRoom roomId={id} />;
 }
