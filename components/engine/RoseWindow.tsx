@@ -116,18 +116,18 @@ export default function RoseWindow({
           })}
         </mask>
       </defs>
-      <g opacity="0.5" style={{ mixBlendMode: 'overlay' }}>
+      <g opacity="0.28">
         <rect x={-W/2} y={-H/2} width={W} height={H} filter={`url(#${defsId}-glass)`} fill="white" mask={`url(#${defsId}-cells-mask)`} />
       </g>
-      <g opacity="0.35" style={{ mixBlendMode: 'soft-light' }}>
+      <g opacity="0.18">
         <rect x={-W/2} y={-H/2} width={W} height={H} filter={`url(#${defsId}-ripple)`} fill="white" mask={`url(#${defsId}-cells-mask)`} />
       </g>
-      <g opacity="0.30" style={{ mixBlendMode: 'multiply' }}>
+      <g opacity="0.12">
         <rect x={-W/2} y={-H/2} width={W} height={H} filter={`url(#${defsId}-crackle)`} fill="#1a0e04" mask={`url(#${defsId}-cells-mask)`} />
       </g>
 
       {/* Cell highlights */}
-      <g opacity="0.85" style={{ mixBlendMode: 'screen' }}>
+      <g opacity="0.6">
         {tris.map(t => {
           const c = colorOf(t);
           if (!c || c === 'empty' || c === 'pebble') return null;

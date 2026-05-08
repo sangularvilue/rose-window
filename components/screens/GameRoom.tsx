@@ -32,6 +32,7 @@ export default function GameRoom({ roomId }: { roomId: string }) {
       const res = await fetch(`/api/room/state?roomId=${roomId}`);
       if (!res.ok) { setError('Room not found'); return; }
       const data: GameState = await res.json();
+      setError('');
       setState(data);
     } catch (_e) {
       setError('Connection lost');

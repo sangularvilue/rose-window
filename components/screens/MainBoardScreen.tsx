@@ -101,7 +101,7 @@ export default function MainBoardScreen({ state, me, isHost, sendAction, waiting
 
         {/* Center: Board */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ width: '100%', maxWidth: 520, aspectRatio: '1/1.1' }}>
+          <div style={{ width: '100%', maxWidth: 560, aspectRatio: '0.87' }}>
             <RoseWindow
               S={240}
               defsId="mb-rw"
