@@ -3,13 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import type { GameState, Player } from '@/lib/types';
 import WaitingLobby from './WaitingLobby';
-import SaintSelectScreen from './SaintSelectScreen';
-import MainBoardScreen from './MainBoardScreen';
-import AuctionScreen from './AuctionScreen';
-import PlacementScreen from './PlacementScreen';
-import ScoringScreen from './ScoringScreen';
-import RuleRemovalScreen from './RuleRemovalScreen';
-import GameOverScreen from './GameOverScreen';
+import GameBoard from './GameBoard';
 import { FONT_DISPLAY, GOLD_INK } from '@/components/engine/SceneAtoms';
 
 function getPlayerId(): string {
@@ -88,29 +82,8 @@ export default function GameRoom({ roomId }: { roomId: string }) {
 
   const commonProps = { state, me: me ?? null, isHost, sendAction, playerId: playerId.current };
 
-  switch (state.phase) {
-    case 'lobby':
-      return <WaitingLobby {...commonProps} />;
-    case 'saint_select':
-      return <SaintSelectScreen {...commonProps} />;
-    case 'income':
-    case 'market':
-      return <MainBoardScreen {...commonProps} waiting />;
-    case 'auction':
-      return <AuctionScreen {...commonProps} />;
-    case 'auction_reveal':
-      return <AuctionScreen {...commonProps} revealed />;
-    case 'placement':
-      return <PlacementScreen {...commonProps} />;
-    case 'demand_update':
-      return <MainBoardScreen {...commonProps} waiting />;
-    case 'end_round':
-    case 'rule_removal':
-      if (state.phase === 'rule_removal') return <RuleRemovalScreen {...commonProps} />;
-      return <ScoringScreen {...commonProps} />;
-    case 'game_over':
-      return <GameOverScreen {...commonProps} />;
-    default:
-      return <MainBoardScreen {...commonProps} />;
+  if (state.phase === 'lobby' || state.phase === 'saint_select') {
+    return <WaitingLobby {...commonProps} />;
   }
+  return <GameBoard {...commonProps} />;
 }

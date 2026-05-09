@@ -179,3 +179,79 @@ export function buildAdjacency(tris: Triangle[]): Map<number, number[]> {
   }
   return map;
 }
+
+// Check if a set of selected triangle IDs forms the same shape as a lot's
+// template under any of the 12 hex isometries (6 rotations × 2 reflections).
+// Returns true for single-triangle lots (any one empty cell is valid).
+export function validatePlacementShape(
+  selectedIds: number[],
+  lotTriangles: number[][],
+  allTris: Triangle[],
+): boolean {
+  const n = lotTriangles.length;
+  if (selectedIds.length !== n) return false;
+  if (n <= 1) return true;
+
+  const centroid3 = (pts: { x: number; y: number }[]) => ({
+    x: pts.reduce((s, p) => s + p.x, 0) / pts.length,
+    y: pts.reduce((s, p) => s + p.y, 0) / pts.length,
+  });
+
+  // Centroids of selected grid triangles
+  const selCentroids = selectedIds.map(id => {
+    const t = allTris.find(t => t.id === id)!;
+    return centroid3(t.points);
+  });
+
+  // Centroids of lot template (pixel coords: [x1,y1,x2,y2,x3,y3])
+  const lotCentroids = lotTriangles.map(tri => ({
+    x: (tri[0] + tri[2] + tri[4]) / 3,
+    y: (tri[1] + tri[3] + tri[5]) / 3,
+  }));
+
+  const normalize = (pts: { x: number; y: number }[]) => {
+    const cx = pts.reduce((s, p) => s + p.x, 0) / pts.length;
+    const cy = pts.reduce((s, p) => s + p.y, 0) / pts.length;
+    return pts.map(p => ({ x: p.x - cx, y: p.y - cy }));
+  };
+
+  const normSel = normalize(selCentroids);
+  const normLot = normalize(lotCentroids);
+
+  // Scale: ratio of RMS distances from centroid
+  const rms = (pts: { x: number; y: number }[]) =>
+    Math.sqrt(pts.reduce((s, p) => s + p.x * p.x + p.y * p.y, 0) / pts.length);
+  const rmsLot = rms(normLot);
+  const rmsSel = rms(normSel);
+  if (rmsLot < 1e-6) return true;
+  const scale = rmsSel / rmsLot;
+
+  const matchesSets = (a: { x: number; y: number }[], b: { x: number; y: number }[], tol: number) => {
+    const used = new Set<number>();
+    for (const pa of a) {
+      let found = false;
+      for (let i = 0; i < b.length; i++) {
+        if (used.has(i)) continue;
+        const dx = pa.x - b[i].x, dy = pa.y - b[i].y;
+        if (Math.sqrt(dx * dx + dy * dy) < tol) { used.add(i); found = true; break; }
+      }
+      if (!found) return false;
+    }
+    return true;
+  };
+
+  const tol = rmsSel * 0.35;
+  const scaledLot = normLot.map(p => ({ x: p.x * scale, y: p.y * scale }));
+
+  for (let k = 0; k < 6; k++) {
+    const theta = k * Math.PI / 3;
+    const cos = Math.cos(theta), sin = Math.sin(theta);
+    // Rotation
+    const rot = scaledLot.map(p => ({ x: p.x * cos - p.y * sin, y: p.x * sin + p.y * cos }));
+    if (matchesSets(rot, normSel, tol)) return true;
+    // Reflection (flip x) then rotation
+    const ref = scaledLot.map(p => ({ x: -(p.x * cos - p.y * sin), y: p.x * sin + p.y * cos }));
+    if (matchesSets(ref, normSel, tol)) return true;
+  }
+  return false;
+}

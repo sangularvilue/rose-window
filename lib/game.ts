@@ -104,7 +104,7 @@ export function resolveIncome(state: GameState): GameState {
     return { ...p, gold: p.gold + income };
   });
   // Reveal market
-  const lotCount = state.players.length + 1;
+  const lotCount = state.players.length;
   const { drawn, remaining } = drawLots(state.lotDeck, lotCount);
   return {
     ...state,
@@ -172,24 +172,47 @@ function resolveAuction(state: GameState): GameState {
   const newPlayers = state.players.map(p => ({ ...p }));
 
   while (eligiblePlayers.size > 0 && remainingLots.length > 0) {
-    // Find the single highest bid across all eligible players and all lots
-    let bestBid = -1;
-    let bestPlayerId = '';
-    let bestLotId = '';
-
+    // Find the highest bid amount across all eligible players and lots
+    let maxBid = -1;
     for (const playerId of eligiblePlayers) {
       const playerBids = state.bids[playerId] || {};
       for (const lot of remainingLots) {
         const bid = playerBids[lot.id] ?? 0;
-        if (bid > bestBid) {
-          bestBid = bid;
-          bestPlayerId = playerId;
-          bestLotId = lot.id;
-        }
+        if (bid > maxBid) maxBid = bid;
+      }
+    }
+    if (maxBid < 0) break;
+
+    // Collect all (player, lot) pairs tied at maxBid
+    const candidates: Array<{ playerId: string; lotId: string }> = [];
+    for (const playerId of eligiblePlayers) {
+      const playerBids = state.bids[playerId] || {};
+      for (const lot of remainingLots) {
+        if ((playerBids[lot.id] ?? 0) === maxBid) candidates.push({ playerId, lotId: lot.id });
       }
     }
 
-    if (bestPlayerId === '' || bestBid < 0) break;
+    // Tiebreak: compare full sorted bid portfolios descending; coin-flip if still tied
+    const sortedBids = (pid: string) =>
+      Object.values(state.bids[pid] || {}).sort((a, b) => b - a);
+    const tiedPlayerIds = [...new Set(candidates.map(c => c.playerId))];
+    let tieWinner = tiedPlayerIds[0];
+    for (let i = 1; i < tiedPlayerIds.length; i++) {
+      const a = sortedBids(tieWinner), b = sortedBids(tiedPlayerIds[i]);
+      const len = Math.max(a.length, b.length);
+      let decided = false;
+      for (let k = 0; k < len; k++) {
+        const av = a[k] ?? 0, bv = b[k] ?? 0;
+        if (av !== bv) { if (bv > av) tieWinner = tiedPlayerIds[i]; decided = true; break; }
+      }
+      if (!decided && Math.random() < 0.5) tieWinner = tiedPlayerIds[i];
+    }
+    // Pick the highest-bid lot for the winning player among tied lots
+    const winnerCandidates = candidates.filter(c => c.playerId === tieWinner);
+    const { playerId: bestPlayerId, lotId: bestLotId } = winnerCandidates[Math.floor(Math.random() * winnerCandidates.length)];
+    const bestBid = maxBid;
+
+    if (bestPlayerId === '') break;
 
     // Find second-highest bid on the winning lot
     let secondBid = 0;
