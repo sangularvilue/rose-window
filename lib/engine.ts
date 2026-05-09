@@ -57,12 +57,12 @@ export const SAINT_LIGHT: Record<SaintKey, { warm: string; cool: string; accent:
 };
 
 export const SAINTS = [
-  { key: 'Moreau' as SaintKey,     name: 'Bl. Basil Moreau',    epithet: 'Hope to Bring',    colors: ['blue','gold'] as Color[],   line: "Mission, Holy Cross, the world's great need." },
-  { key: 'Brigid' as SaintKey,     name: 'St. Brigid',           epithet: 'The Living Cross', colors: ['green','gold'] as Color[],  line: 'Long green arms, kindled by gold.' },
-  { key: 'Lawrence' as SaintKey,   name: 'St. Lawrence',         epithet: 'Trial by Fire',    colors: ['red','purple'] as Color[],  line: 'Red-majority rows, purple martyrdom, gridiron.' },
-  { key: 'Francis' as SaintKey,    name: 'St. Francis',          epithet: 'All Creatures',    colors: ['green','blue'] as Color[],  line: 'A living cluster, gathered around creation.' },
-  { key: 'Dionysius' as SaintKey,  name: 'Ps.-Dionysius',        epithet: 'Via Negativa',     colors: ['purple'] as Color[],        line: 'Sacred absence, divine darkness, the unseen.' },
-  { key: 'Christopher' as SaintKey, name: 'St. Christopher',     epithet: 'The Crossing',     colors: ['blue','red'] as Color[],    line: 'Pilgrimage, reaching new rings, the crossing.' },
+  { key: 'Moreau' as SaintKey,     name: 'Bl. Basil Moreau',    epithet: 'Hope to Bring',    colors: ['blue','gold'] as Color[],   line: "Mission, Holy Cross, the world's great need.",  ability: 'Holy Cross',        abilityDesc: 'Blue and gold lots cost 10% less.' },
+  { key: 'Brigid' as SaintKey,     name: 'St. Brigid',           epithet: 'The Living Cross', colors: ['green','gold'] as Color[],  line: 'Long green arms, kindled by gold.',             ability: 'Ladies First',      abilityDesc: 'Wins all auction ties. Green and gold lots cost 10% less.' },
+  { key: 'Lawrence' as SaintKey,   name: 'St. Lawrence',         epithet: 'Trial by Fire',    colors: ['red','purple'] as Color[],  line: 'Red-majority rows, purple martyrdom, gridiron.',ability: 'Seed of the Church', abilityDesc: 'Red lots cost 10% less.' },
+  { key: 'Francis' as SaintKey,    name: 'St. Francis',          epithet: 'All Creatures',    colors: ['green','blue'] as Color[],  line: 'A living cluster, gathered around creation.',   ability: 'Sister Poverty',    abilityDesc: 'Pays the exact second-highest bid — never the +1 overpayment.' },
+  { key: 'Dionysius' as SaintKey,  name: 'Ps.-Dionysius',        epithet: 'Via Negativa',     colors: ['purple'] as Color[],        line: 'Sacred absence, divine darkness, the unseen.', ability: 'Via Negativa',      abilityDesc: 'Pebbles and rocks cost 10% less.' },
+  { key: 'Christopher' as SaintKey, name: 'St. Christopher',     epithet: 'The Crossing',     colors: ['blue','red'] as Color[],    line: 'Pilgrimage, reaching new rings, the crossing.', ability: 'The Crossing',      abilityDesc: 'Blue and red lots cost 10% less.' },
 ];
 
 export type PatternFn = (t: Triangle) => Color | null;

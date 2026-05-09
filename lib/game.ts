@@ -192,21 +192,32 @@ function resolveAuction(state: GameState): GameState {
       }
     }
 
-    // Tiebreak: compare full sorted bid portfolios descending; coin-flip if still tied
-    const sortedBids = (pid: string) =>
-      Object.values(state.bids[pid] || {}).sort((a, b) => b - a);
-    const tiedPlayerIds = [...new Set(candidates.map(c => c.playerId))];
-    let tieWinner = tiedPlayerIds[0];
-    for (let i = 1; i < tiedPlayerIds.length; i++) {
-      const a = sortedBids(tieWinner), b = sortedBids(tiedPlayerIds[i]);
-      const len = Math.max(a.length, b.length);
-      let decided = false;
-      for (let k = 0; k < len; k++) {
-        const av = a[k] ?? 0, bv = b[k] ?? 0;
-        if (av !== bv) { if (bv > av) tieWinner = tiedPlayerIds[i]; decided = true; break; }
+    // Brigid: "Ladies First" — wins all ties automatically
+    const brigidId = candidates
+      .map(c => state.players.find(p => p.id === c.playerId))
+      .find(p => p?.saint === 'Brigid')?.id;
+
+    let tieWinner: string;
+    if (brigidId && candidates.some(c => c.playerId === brigidId)) {
+      tieWinner = brigidId;
+    } else {
+      // Tiebreak: compare full sorted bid portfolios descending; coin-flip if still tied
+      const sortedBids = (pid: string) =>
+        Object.values(state.bids[pid] || {}).sort((a, b) => b - a);
+      const tiedPlayerIds = [...new Set(candidates.map(c => c.playerId))];
+      tieWinner = tiedPlayerIds[0];
+      for (let i = 1; i < tiedPlayerIds.length; i++) {
+        const a = sortedBids(tieWinner), b = sortedBids(tiedPlayerIds[i]);
+        const len = Math.max(a.length, b.length);
+        let decided = false;
+        for (let k = 0; k < len; k++) {
+          const av = a[k] ?? 0, bv = b[k] ?? 0;
+          if (av !== bv) { if (bv > av) tieWinner = tiedPlayerIds[i]; decided = true; break; }
+        }
+        if (!decided && Math.random() < 0.5) tieWinner = tiedPlayerIds[i];
       }
-      if (!decided && Math.random() < 0.5) tieWinner = tiedPlayerIds[i];
     }
+
     // Pick the highest-bid lot for the winning player among tied lots
     const winnerCandidates = candidates.filter(c => c.playerId === tieWinner);
     const { playerId: bestPlayerId, lotId: bestLotId } = winnerCandidates[Math.floor(Math.random() * winnerCandidates.length)];
@@ -221,7 +232,39 @@ function resolveAuction(state: GameState): GameState {
       const bid = (state.bids[playerId] || {})[bestLotId] ?? 0;
       if (bid > secondBid) secondBid = bid;
     }
-    const price = secondBid + 1;
+    const rawPrice = secondBid + 1;
+
+    // Apply saint auction abilities to the price
+    const winnerSaint = state.players.find(p => p.id === bestPlayerId)?.saint;
+    const wonLot = remainingLots.find(l => l.id === bestLotId);
+    const wonColor = wonLot?.color ?? '';
+    let price = rawPrice;
+    switch (winnerSaint) {
+      case 'Francis':
+        // "Sister Poverty": pays exact second-highest bid, no +1 overpayment
+        price = secondBid;
+        break;
+      case 'Moreau':
+        // "Holy Cross": blue and gold lots 10% off
+        if (wonColor === 'blue' || wonColor === 'gold') price = Math.floor(rawPrice * 0.9);
+        break;
+      case 'Lawrence':
+        // "Seed of the Church": red lots 10% off
+        if (wonColor === 'red') price = Math.floor(rawPrice * 0.9);
+        break;
+      case 'Dionysius':
+        // "Via Negativa": pebbles 10% off
+        if (wonColor === 'pebble') price = Math.floor(rawPrice * 0.9);
+        break;
+      case 'Christopher':
+        // "The Crossing": blue and red lots 10% off
+        if (wonColor === 'blue' || wonColor === 'red') price = Math.floor(rawPrice * 0.9);
+        break;
+      case 'Brigid':
+        // "Ladies First": green and gold lots 10% off (her colors)
+        if (wonColor === 'green' || wonColor === 'gold') price = Math.floor(rawPrice * 0.9);
+        break;
+    }
 
     // Winner pays price, wins lot
     const winner = newPlayers.find(p => p.id === bestPlayerId)!;

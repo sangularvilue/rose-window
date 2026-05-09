@@ -161,9 +161,14 @@ export default function WaitingLobby({ state, me, isHost, sendAction, playerId }
                       <RoseWindow S={30} defsId={`wl-sel-${s.key}`} colorFn={PATTERNS[s.key]} saintKey={s.key} haloIntensity={0.8} />
                     </div>
                     <div style={{ fontFamily: FONT_DISPLAY, fontSize: 13, lineHeight: 1.2 }}>{s.name}</div>
-                    <div style={{ fontFamily: FONT_DISPLAY, fontStyle: 'italic', fontSize: 11, color: taken ? 'rgba(196,149,58,0.3)' : GOLD_INK }}>
+                    <div style={{ fontFamily: FONT_DISPLAY, fontStyle: 'italic', fontSize: 11, color: taken ? 'rgba(196,149,58,0.3)' : GOLD_INK, marginBottom: 3 }}>
                       {taken ? 'Taken' : s.epithet}
                     </div>
+                    {!taken && (
+                      <div style={{ fontSize: 9, color: 'rgba(243,233,210,0.5)', lineHeight: 1.3 }}>
+                        <span style={{ color: 'rgba(196,149,58,0.8)' }}>{s.ability}:</span> {s.abilityDesc}
+                      </div>
+                    )}
                   </button>
                 );
               })}
